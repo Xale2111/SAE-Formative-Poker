@@ -10,6 +10,15 @@ Table::Table(Player* player1, Player* player2, Deck* deck)
 	_deck = deck;
 }
 
+//Private Functions
+void Table::AddCardToCenter()
+{
+	Card pickedCard = _deck->PickCard();
+	_tableCards.emplace_back(pickedCard);
+	std::cout << "Picked card : " << pickedCard.ToString() << std::endl;
+}
+
+
 //Public Functions
 HandValue Table::CheckPlayerHand(Player player)
 {
@@ -46,4 +55,22 @@ Player Table::GetPlayerTwo()
 Deck Table::GetDeck()
 {
 	return *_deck;
+}
+
+void Table::Flop()
+{
+	for (int i = 0; i < 3; i++)
+	{		
+		AddCardToCenter();
+
+	}
+}
+
+void Table::FourthStreet()
+{
+	AddCardToCenter();
+}
+void Table::FifthStreet()
+{
+	AddCardToCenter();
 }

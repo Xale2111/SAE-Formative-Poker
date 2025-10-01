@@ -29,11 +29,16 @@ int main()
     table.CheckPlayerHand(table.GetPlayerTwo());
     std::cout << "\n----\n" << std::endl;
 
-    for(auto card : table.GetDeck().GetDeck())
+    /*for (auto card : table.GetDeck().GetDeck())
     { 
         std::cout << card.ToString() << std::endl;
-    }
-    
+    }*/
+
+    table.Flop();
+
+    table.FourthStreet();
+    table.FifthStreet();
+
     //Should I create a Menu ?
     
     // Create Deck

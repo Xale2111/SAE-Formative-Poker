@@ -26,6 +26,8 @@ private:
 	Player* _player1;
 	Player* _player2;
 	Deck* _deck;	
+
+	void AddCardToCenter();
 public:
 	Table(Player* player1, Player* player2, Deck* deck);
 
@@ -35,7 +37,9 @@ public:
 	Player GetPlayerOne();
 	Player GetPlayerTwo();
 	Deck GetDeck();
-	
+	void Flop();
+	void FourthStreet();
+	void FifthStreet();
 	//Play turn
 	//Flop (add the first 3 cards in the center)
 	//Fourth Street (add the fourth card)
