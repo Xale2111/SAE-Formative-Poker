@@ -1,0 +1,28 @@
+# Dossiers Visual Studio
+.vs/
+*.vcxproj.user
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Build output
+[Bb]uild/
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+out/
+*.obj
+*.exe
+*.pdb
+*.idb
+*.ipch
+*.ilk
+*.log
+*.tlog
+*.cache
+*.db
+*.opendb
+*.VC.db
+*.VC.VC.opendb
