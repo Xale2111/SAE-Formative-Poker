@@ -10,7 +10,8 @@ int defaultStartMoney = 500;
 int main()
 {
     SetConsoleOutputCP(CP_UTF8); // passe la console en UTF-8
-    //std::cout << reinterpret_cast<const char*>(u8"♥ ♦ ♣ ♠") << std::endl;
+    std::string test = reinterpret_cast<const char*>(u8"♥ ♦ ♣ ♠");
+    //std::cout << test << std::endl;
 
     int amountOfPlayer = 2;
 
@@ -24,20 +25,23 @@ int main()
         player.GetNewCard(deck.PickCard());
         bot.GetNewCard(deck.PickCard());
     }
-    table.CheckPlayerHand(table.GetPlayerOne());
-    std::cout << "\n----\n" << std::endl;
-    table.CheckPlayerHand(table.GetPlayerTwo());
-    std::cout << "\n----\n" << std::endl;
+
+    std::cout << player.GetName() +" \t\t:"+ player.ToString()<<std::endl;
+    std::cout << bot.GetName() + " \t:" + bot.ToString()<<std::endl;
 
     /*for (auto card : table.GetDeck().GetDeck())
     { 
         std::cout << card.ToString() << std::endl;
     }*/
-
+    /*
     table.Flop();
 
     table.FourthStreet();
-    table.FifthStreet();
+    table.FifthStreet();*/
+    table.CheatCenterCards();
+
+    table.CheckPlayerHand(table.GetPlayerOne());
+    table.CheckPlayerHand(table.GetPlayerTwo());
 
     //Should I create a Menu ?
     

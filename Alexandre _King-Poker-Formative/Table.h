@@ -11,7 +11,7 @@ enum class HandValue
 	kStraight,
 	kFlush,
 	kFull,
-	kFourOfAKing,
+	kFourOfAKind,
 	kStraightFlush,
 	kRoyalFlush
 
@@ -28,6 +28,13 @@ private:
 	Deck* _deck;	
 
 	void AddCardToCenter();
+	bool CheckRoyalFlush(std::vector<Card> cards);
+	bool CheckStraightFlush(std::vector<Card> cards);
+	std::vector<Card> CheckFlush(std::vector<Card> cards);
+	std::vector<Card> CheckStraight(std::vector<Card> cards);
+	std::vector<Card> SortByColor(std::vector<Card> cards);
+	std::vector<Card> SortByValue(std::vector<Card> cards);
+
 public:
 	Table(Player* player1, Player* player2, Deck* deck);
 
@@ -40,6 +47,8 @@ public:
 	void Flop();
 	void FourthStreet();
 	void FifthStreet();
+
+	void CheatCenterCards();
 	//Play turn
 	//Flop (add the first 3 cards in the center)
 	//Fourth Street (add the fourth card)
