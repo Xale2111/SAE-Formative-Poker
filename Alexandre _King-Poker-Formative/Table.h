@@ -1,4 +1,6 @@
 #pragma once
+#include <unordered_map>
+
 #include "Deck.h"
 #include "Player.h"
 
@@ -31,7 +33,7 @@ private:
 	void AddCardToCenter();
 	std::vector<Card> SortByColor(std::vector<Card> cards);
 	std::vector<Card> SortByValue(std::vector<Card> cards);
-
+	std::unordered_map<Value, int> FindAllOccurencesOfEachValue(std::vector<Card> cards);
 
 
 	//For Royal flush, since this is either an equality or a win for the player, no need to return the cards
@@ -39,13 +41,13 @@ private:
 	//every time we return a vector of card, the vector should contains the 5 final cards (easier to check the highest card afterwards)
 	bool CheckRoyalFlush(std::vector<Card> cards);
 	std::vector<Card> CheckStraightFlush(std::vector<Card> cards);	
-	std::vector<Card> CheckFourOfAKind(std::vector<Card>);
-	std::vector<Card> CheckFull(std::vector<Card>);
+	std::vector<Card> CheckFourOfAKind(std::vector<Card> cards);
+	std::vector<Card> CheckFull(std::vector<Card> cards);
 	std::vector<Card> CheckFlush(std::vector<Card> cards);
 	std::vector<Card> CheckStraight(std::vector<Card> cards);
-	std::vector<Card> CheckThreeOfAKind(std::vector<Card>);
-	std::vector<Card> CheckTwoPairs(std::vector<Card>);
-	std::vector<Card> CheckPair(std::vector<Card>);
+	std::vector<Card> CheckThreeOfAKind(std::vector<Card> cards);
+	std::vector<Card> CheckTwoPairs(std::vector<Card> cards);
+	std::vector<Card> CheckPair(std::vector<Card> cards);
 
 
 public:

@@ -20,14 +20,17 @@ int main()
     Player bot("REALLY BAD BOT",defaultStartMoney);
     Table table(&player,&bot,&deck);
    
-    for (int inx = 0; inx < amountOfPlayer; inx++)
+   /* for (int inx = 0; inx < amountOfPlayer; inx++)
     {
         player.GetNewCard(deck.PickCard());
         bot.GetNewCard(deck.PickCard());
-    }
+    }*/
+
+    player.GetNewCard(Card(Value::k10, Color::kHearts));
+    player.GetNewCard(Card(Value::k3, Color::kHearts));
 
     std::cout << player.GetName() +" \t\t:"+ player.ToString()<<std::endl;
-    std::cout << bot.GetName() + " \t:" + bot.ToString()<<std::endl;
+ //   std::cout << bot.GetName() + " \t:" + bot.ToString()<<std::endl;
 
     /*for (auto card : table.GetDeck().GetDeck())
     { 
@@ -41,7 +44,7 @@ int main()
     table.CheatCenterCards();
 
     table.CheckPlayerHand(table.GetPlayerOne());
-    table.CheckPlayerHand(table.GetPlayerTwo());
+    //table.CheckPlayerHand(table.GetPlayerTwo());
 
     //Should I create a Menu ?
     

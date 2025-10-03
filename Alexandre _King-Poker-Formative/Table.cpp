@@ -1,6 +1,7 @@
 #include "Table.h"
 #include <iostream>
 #include <algorithm>
+#include <unordered_map>
 using namespace std;
 //Constructor
 Table::Table(Player* player1, Player* player2, Deck* deck)
@@ -36,6 +37,41 @@ std::vector<Card> Table::SortByValue(std::vector<Card> cards)
 		});
 	return cards;
 }
+
+unordered_map<Value, int> Table::FindAllOccurencesOfEachValue(std::vector<Card> cards)
+{
+	vector<Card> tempCopy = cards;
+	unordered_map<Value, int> occurencesOfEachValue;
+
+	auto newEnd = std::unique(tempCopy.begin(), tempCopy.end(),
+		[](Card a, Card b) {
+			return a.GetValue() == b.GetValue();
+		});
+
+	tempCopy.erase(newEnd, tempCopy.end());
+	for (auto card : tempCopy)
+	{
+		occurencesOfEachValue.insert(pair<Value, int>(card.GetValue(), 0));
+	}
+
+	Value currentValue = cards[0].GetValue();
+	for (auto card : cards)
+	{
+		if (card.GetValue() == currentValue)
+		{
+			occurencesOfEachValue.at(currentValue)++;
+		}
+		else
+		{
+			currentValue = card.GetValue();
+			occurencesOfEachValue.at(currentValue)++;
+		}
+
+	}
+
+	return occurencesOfEachValue;
+}
+
 
 
 bool Table::CheckRoyalFlush(std::vector<Card> cards)
@@ -118,6 +154,12 @@ std::vector<Card> Table::CheckFlush(std::vector<Card> cards)
 		}
 	}
 
+	if (returnedCards.size() >5)
+	{
+		returnedCards = SortByValue(returnedCards);
+		returnedCards.resize(5);
+	}
+	
 
 	return returnedCards;
 }
@@ -125,19 +167,17 @@ std::vector<Card> Table::CheckFlush(std::vector<Card> cards)
 std::vector<Card> Table::CheckStraight(std::vector<Card> cards)
 {
 	vector<Card> returnedCards;
+	unordered_map<Value, int> occurencesOfEachValue = FindAllOccurencesOfEachValue(cards);
+
+	if (occurencesOfEachValue.size() < 5)
+	{
+		return returnedCards;
+	}
 
 	cards = SortByValue(cards);
 
-	vector<Card> sameValue;
+	
 	int currentValue = (int)cards[0].GetValue();
-	bool straightStartingFromAce = false;
-	if (currentValue == (int)Value::k2)
-	{
-		if (cards[cards.size()-1].GetValue() == Value::kAce )
-		{
-			straightStartingFromAce = true;
-		}
-	}
 
 	for (auto card : cards)
 	{
@@ -148,38 +188,265 @@ std::vector<Card> Table::CheckStraight(std::vector<Card> cards)
 		}
 		else
 		{
-			if (straightStartingFromAce)
-			{
-				if (returnedCards.size() < 4 && card.GetValue() < Value::k5)
-				{
-					returnedCards.clear();
-				}
-				else
-				{
-					returnedCards.push_back(cards[cards.size() - 1]);
-					return returnedCards;
+			returnedCards.emplace_back(card);
+			currentValue = (int)card.GetValue();
+		}
 
+		if (returnedCards.size() == 4 && card.GetValue() == Value::k5)
+		{
+			if (cards[cards.size()-1].GetValue() == Value::kAce)
+			{
+				returnedCards.emplace_back(cards[cards.size() - 1]);
+				return returnedCards;
+			}
+		}
+		
+	}
+
+	
+
+	return returnedCards;
+}
+
+std::vector<Card> Table::CheckFourOfAKind(std::vector<Card> cards)
+{
+	vector<Card> returnedCards;
+	cards = SortByValue(cards);
+	unordered_map<Value, int> occurencesOfEachValue = FindAllOccurencesOfEachValue(cards);
+
+	bool has4OfAKind = false;
+	Value valueOf4OfAKind;
+
+	for (auto occurence : occurencesOfEachValue)
+	{
+		if (occurence.second == 4)
+		{
+			has4OfAKind = true;
+			valueOf4OfAKind = occurence.first;
+		}
+	}
+
+	if (has4OfAKind)
+	{
+		for (auto card : cards)
+		{
+			if (card.GetValue() == valueOf4OfAKind)
+			{
+				returnedCards.emplace_back(card);
+			}
+		}
+
+		reverse(cards.begin(), cards.end());
+		int counterComplete = 1;
+		for (auto card : cards)
+		{
+			if (card.GetValue() != valueOf4OfAKind && counterComplete > 0)
+			{
+				returnedCards.emplace_back(card);
+				counterComplete--;
+			}
+		}
+	}
+	
+
+	return returnedCards;
+}
+
+std::vector<Card> Table::CheckFull(std::vector<Card> cards)
+{
+	vector<Card> returnedCards;
+	unordered_map<Value, int> occurencesOfEachValue = FindAllOccurencesOfEachValue(cards);
+
+	bool hasPair = false;
+	Value valueOfPair;
+	bool has3OfAKind = false;
+	Value valueOf3OfAKind;
+
+	for (auto occurence : occurencesOfEachValue)
+	{
+		if (occurence.second == 2)
+		{
+			hasPair = true;
+			valueOfPair = occurence.first;
+		}
+		else if (occurence.second == 3)
+		{
+			has3OfAKind = true;
+			valueOf3OfAKind = occurence.first;
+		}
+	}
+
+	if (hasPair && has3OfAKind)
+	{
+		for (auto card : cards)
+		{
+			if (card.GetValue() == valueOfPair || card.GetValue() == valueOf3OfAKind)
+			{
+				returnedCards.emplace_back(card);
+			}
+		}
+	}
+
+	return returnedCards;
+
+}
+std::vector<Card> Table::CheckThreeOfAKind(std::vector<Card> cards)
+{
+	vector<Card> returnedCards;
+	cards = SortByValue(cards);
+	unordered_map<Value, int> occurencesOfEachValue = FindAllOccurencesOfEachValue(cards);
+
+	bool has3OfAKind = false;
+	Value valueOf3OfAKind;
+
+	for (auto occurence : occurencesOfEachValue)
+	{
+		if (occurence.second == 3)
+		{
+			valueOf3OfAKind = occurence.first;
+		}
+	}
+	if (has3OfAKind)
+	{
+		for (auto card : cards)
+		{
+			if (card.GetValue() == valueOf3OfAKind)
+			{
+				returnedCards.emplace_back(card);
+			}
+		}
+
+		reverse(cards.begin(), cards.end());
+		int counterComplete =  2;
+		for (auto card : cards)
+		{
+			if (counterComplete > 0)
+			{
+				if (card.GetValue() != valueOf3OfAKind)
+				{
+					returnedCards.emplace_back(card);
+					counterComplete--;
 				}
 			}
 			else
 			{
-				if (returnedCards.size() < 5)
+				break;
+			}
+		}
+	}
+
+
+	return returnedCards;
+}
+std::vector<Card> Table::CheckTwoPairs(std::vector<Card> cards)
+{
+	vector<Card> returnedCards;
+	cards = SortByValue(cards);
+	unordered_map<Value, int> occurencesOfEachValue = FindAllOccurencesOfEachValue(cards);
+
+	bool hasFirstPair = false;
+	Value valueOfFirstPair;
+
+	bool hasSecondPair = false;
+	Value valueOfSecondPair;
+
+	for (auto occurence : occurencesOfEachValue)
+	{
+		if (occurence.second == 2 && !hasFirstPair)
+		{
+			hasFirstPair = true;
+			valueOfFirstPair = occurence.first;
+		}
+		else if (occurence.second == 2)
+		{
+
+			hasSecondPair = true;
+			valueOfSecondPair = occurence.first;
+		}
+	}
+
+	if (hasFirstPair && hasSecondPair)
+	{
+		for (auto card : cards)
+		{
+			if (card.GetValue() == valueOfFirstPair || card.GetValue() == valueOfSecondPair)
+			{
+				returnedCards.emplace_back(card);
+			}
+		}
+
+		reverse(cards.begin(), cards.end());
+		int counterComplete = 1;
+		for (auto card : cards)
+		{
+			if (counterComplete > 0)
+			{
+				if (card.GetValue() != valueOfFirstPair && card.GetValue() != valueOfSecondPair)
 				{
-					returnedCards.clear();
-				}
-				else
-				{
-					return returnedCards;
+					returnedCards.emplace_back(card);
+					counterComplete--;
 				}
 			}
-			returnedCards.emplace_back(card);
-			currentValue = (int)card.GetValue();
+			else
+			{
+				break;
+			}
+		}
+	}
 
+
+	return returnedCards;
+}
+std::vector<Card> Table::CheckPair(std::vector<Card> cards)
+{
+	vector<Card> returnedCards;
+	cards = SortByValue(cards);
+	unordered_map<Value, int> occurencesOfEachValue = FindAllOccurencesOfEachValue(cards);
+
+	bool hasPair = false;
+	Value valueOfPair;
+
+	for (auto occurence : occurencesOfEachValue)
+	{
+		if (occurence.second == 2)
+		{
+			hasPair = true;
+			valueOfPair = occurence.first;
+		}
+	}
+
+	if (hasPair)
+	{
+		for (auto card : cards)
+		{
+			if (card.GetValue() == valueOfPair)
+			{
+				returnedCards.emplace_back(card);
+			}
+		}
+
+		reverse(cards.begin(), cards.end());
+		int counterComplete = 3;
+		for (auto card : cards)
+		{
+			if (counterComplete > 0)
+			{
+				if (card.GetValue() != valueOfPair)
+				{
+					returnedCards.emplace_back(card);
+					counterComplete--;
+				}
+			}
+			else
+			{
+				break;
+			}
 		}
 	}
 
 	return returnedCards;
 }
+
 
 
 
@@ -208,9 +475,37 @@ HandValue Table::CheckPlayerHand(Player player)
 	{
 		playerHandValue = HandValue::kStraightFlush;
 	}
-	else if (true)
+	else if (CheckFourOfAKind(allCards).size() >= 5)
 	{
-
+		playerHandValue = HandValue::kFourOfAKind;
+	}
+	else if (CheckFull(allCards).size() >= 5)
+	{
+		playerHandValue = HandValue::kFull;
+	}
+	else if (CheckFlush(allCards).size() >= 5)
+	{
+		playerHandValue = HandValue::kFlush;
+	}
+	else if (CheckStraight(allCards).size() >= 5)
+	{
+		playerHandValue = HandValue::kStraight;
+	}
+	else if (CheckThreeOfAKind(allCards).size() >= 5)
+	{
+		playerHandValue = HandValue::kThreeOfAKind;
+	}
+	else if (CheckTwoPairs(allCards).size() >= 5)
+	{
+		playerHandValue = HandValue::kTwoPairs;
+	}
+	else if (CheckPair(allCards).size() >= 5)
+	{
+		playerHandValue = HandValue::kPair;
+	}
+	else
+	{
+		playerHandValue = HandValue::kHighCard;
 	}
 	
 	
@@ -255,10 +550,10 @@ void Table::FifthStreet()
 
 void Table::CheatCenterCards()
 {
-	_tableCards.emplace_back(Card(Value::kAce,Color::kHearts));
-	_tableCards.emplace_back(Card(Value::k2, Color::kHearts));
-	_tableCards.emplace_back(Card(Value::k3, Color::kHearts));
-	_tableCards.emplace_back(Card(Value::k4, Color::kHearts));
-	_tableCards.emplace_back(Card(Value::k5, Color::kHearts));
+	_tableCards.emplace_back(Card(Value::k2,Color::kHearts));
+	_tableCards.emplace_back(Card(Value::kAce, Color::kClub));
+	_tableCards.emplace_back(Card(Value::kKing, Color::kSpades));
+	_tableCards.emplace_back(Card(Value::kQueen, Color::kSquares));
+	_tableCards.emplace_back(Card(Value::kJack, Color::kHearts));
 
 }
