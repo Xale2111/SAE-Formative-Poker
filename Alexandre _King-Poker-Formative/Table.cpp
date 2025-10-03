@@ -49,7 +49,7 @@ bool Table::CheckRoyalFlush(std::vector<Card> cards)
 		if (royalFlushCards.size() >= 5)
 		{
 			reverse(royalFlushCards.begin(), royalFlushCards.end());
-			if (royalFlushCards[0].GetValue() == Value::kAce && royalFlushCards[2].GetValue() == Value::kQueen)
+			if (royalFlushCards[0].GetValue() == Value::kAce && royalFlushCards[4].GetValue() == Value::k10)
 			{
 				return true;
 			}
@@ -61,7 +61,7 @@ bool Table::CheckRoyalFlush(std::vector<Card> cards)
 
 }
 
-bool Table::CheckStraightFlush(std::vector<Card> cards)
+std::vector<Card> Table::CheckStraightFlush(std::vector<Card> cards)
 {
 	std::vector<Card> straightFlushCards = CheckFlush(cards);
 	if (straightFlushCards.size() >= 5)
@@ -69,12 +69,12 @@ bool Table::CheckStraightFlush(std::vector<Card> cards)
 		straightFlushCards = CheckStraight(straightFlushCards);
 		if (straightFlushCards.size() >= 5)
 		{
-			return true;
+			return straightFlushCards;
 		}
 	}
 
 
-	return false;
+	return straightFlushCards;
 
 }
 
@@ -117,6 +117,8 @@ std::vector<Card> Table::CheckFlush(std::vector<Card> cards)
 			}
 		}
 	}
+
+
 	return returnedCards;
 }
 
@@ -202,15 +204,16 @@ HandValue Table::CheckPlayerHand(Player player)
 	{
 		playerHandValue = HandValue::kRoyalFlush;
 	}
-	else if (CheckStraightFlush(allCards))
+	else if (CheckStraightFlush(allCards).size() >= 5)
 	{
 		playerHandValue = HandValue::kStraightFlush;
 	}
-	
-	if (finalCards.size()<5)
+	else if (true)
 	{
-		
+
 	}
+	
+	
 
 	return playerHandValue;
 }
