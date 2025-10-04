@@ -12,6 +12,7 @@ Table::Table(Player* player1, Player* player2, Deck* deck)
 }
 
 //Private Functions
+//Add one card to the center of the table (doesn't burn a card)
 void Table::AddCardToCenter()
 {
 	Card pickedCard = _deck->PickCard();
@@ -19,6 +20,7 @@ void Table::AddCardToCenter()
 	std::cout << "Picked card : " << pickedCard.ToString() << std::endl;
 }
 
+//Sort given cards by color
 std::vector<Card> Table::SortByColor(std::vector<Card> cards)
 {
 
@@ -29,6 +31,7 @@ std::vector<Card> Table::SortByColor(std::vector<Card> cards)
 	return cards;
 }
 
+//sort given cards by value
 std::vector<Card> Table::SortByValue(std::vector<Card> cards)
 {
 	sort(cards.begin(), cards.end(), [](Card cardA, Card cardB)
@@ -38,11 +41,13 @@ std::vector<Card> Table::SortByValue(std::vector<Card> cards)
 	return cards;
 }
 
+//Find all occurences of the same value and returns an unordered map where the Key is the card value and value is the amount of occurence 
 unordered_map<Value, int> Table::FindAllOccurencesOfEachValue(std::vector<Card> cards)
 {
 	vector<Card> tempCopy = cards;
 	unordered_map<Value, int> occurencesOfEachValue;
 
+	//filter to have a temp vector with only 1 occurence of each value
 	auto newEnd = std::unique(tempCopy.begin(), tempCopy.end(),
 		[](Card a, Card b) {
 			return a.GetValue() == b.GetValue();
@@ -54,6 +59,7 @@ unordered_map<Value, int> Table::FindAllOccurencesOfEachValue(std::vector<Card> 
 		occurencesOfEachValue.insert(pair<Value, int>(card.GetValue(), 0));
 	}
 
+	//for each card, increase the occurence amount for each value
 	Value currentValue = cards[0].GetValue();
 	for (auto card : cards)
 	{
@@ -76,8 +82,7 @@ unordered_map<Value, int> Table::FindAllOccurencesOfEachValue(std::vector<Card> 
 
 bool Table::CheckRoyalFlush(std::vector<Card> cards)
 {
-	
-
+	//Check if there's a Flush, then if there's a straight and finally, if the straight begins with an Ace and finishes with a 10
 	std::vector<Card> royalFlushCards = CheckFlush(cards);
 	if (royalFlushCards.size() >= 5)
 	{
@@ -91,14 +96,13 @@ bool Table::CheckRoyalFlush(std::vector<Card> cards)
 			}
 		}
 	}
-
-
 	return false;
-
 }
+
 
 std::vector<Card> Table::CheckStraightFlush(std::vector<Card> cards)
 {
+	//First check is there's a flush, then check if there's a straight
 	std::vector<Card> straightFlushCards = CheckFlush(cards);
 	if (straightFlushCards.size() >= 5)
 	{
@@ -109,11 +113,11 @@ std::vector<Card> Table::CheckStraightFlush(std::vector<Card> cards)
 		}
 	}
 
-
 	return straightFlushCards;
 
 }
 
+//Sort by color and check if the same color appends 5 consecutive times 
 std::vector<Card> Table::CheckFlush(std::vector<Card> cards)
 {
 	vector<Card> returnedCards;
@@ -154,6 +158,7 @@ std::vector<Card> Table::CheckFlush(std::vector<Card> cards)
 		}
 	}
 
+	//resize to only have the 5 highest cards of the flush
 	if (returnedCards.size() >5)
 	{
 		returnedCards = SortByValue(returnedCards);
@@ -164,6 +169,10 @@ std::vector<Card> Table::CheckFlush(std::vector<Card> cards)
 	return returnedCards;
 }
 
+//check if there's more the 5 different value,
+//if so, check if the straight starts with 2 and end with 5 and if there's an ACE (for the straight from Ace to 5)
+//If not, just checks if there's a straight by checking if card value = last card value +1
+//TODO:Still need to return only 5 cards
 std::vector<Card> Table::CheckStraight(std::vector<Card> cards)
 {
 	vector<Card> returnedCards;
@@ -181,7 +190,7 @@ std::vector<Card> Table::CheckStraight(std::vector<Card> cards)
 
 	for (auto card : cards)
 	{
-		if ((int)card.GetValue() == currentValue+1)
+		if ((int)card.GetValue() == currentValue + 1)
 		{
 			returnedCards.emplace_back(card);
 			currentValue++;
@@ -194,20 +203,20 @@ std::vector<Card> Table::CheckStraight(std::vector<Card> cards)
 
 		if (returnedCards.size() == 4 && card.GetValue() == Value::k5)
 		{
-			if (cards[cards.size()-1].GetValue() == Value::kAce)
+			if (cards[cards.size() - 1].GetValue() == Value::kAce)
 			{
 				returnedCards.emplace_back(cards[cards.size() - 1]);
 				return returnedCards;
 			}
 		}
-		
-	}
 
-	
+	}
 
 	return returnedCards;
 }
 
+//Uses the "FindAllOccurencesOfEachValue" function to check if there's 4 time the same value of a card
+//If so, returns all 4 cards + the highest card (if there's four Aces, takes the highest card after the Aces)
 std::vector<Card> Table::CheckFourOfAKind(std::vector<Card> cards)
 {
 	vector<Card> returnedCards;
@@ -251,7 +260,8 @@ std::vector<Card> Table::CheckFourOfAKind(std::vector<Card> cards)
 
 	return returnedCards;
 }
-
+//Uses the "FindAllOccurencesOfEachValue" function to check if there's at least 3 of a kind and a pair. If so, returns the 5 cards
+//This should take the highest 3 of a kind and the highest pair
 std::vector<Card> Table::CheckFull(std::vector<Card> cards)
 {
 	vector<Card> returnedCards;
@@ -290,6 +300,9 @@ std::vector<Card> Table::CheckFull(std::vector<Card> cards)
 	return returnedCards;
 
 }
+
+//Uses the "FindAllOccurencesOfEachValue" function to check if there's 3 cards with the same value
+//If so, complete with the two highest cards (takes the two highest card that are NOT the value of the 3 of a kind)
 std::vector<Card> Table::CheckThreeOfAKind(std::vector<Card> cards)
 {
 	vector<Card> returnedCards;
@@ -338,6 +351,12 @@ std::vector<Card> Table::CheckThreeOfAKind(std::vector<Card> cards)
 
 	return returnedCards;
 }
+
+
+//Uses the "FindAllOccurencesOfEachValue" function to check if there's a pair twice
+//If so, the second pair will be the highest pair available.
+//(the first pair could be lower than another pair available but since the only pair that matters is the highest one we don't care)
+//Complete with the highest card that's NOT the value of the pairs
 std::vector<Card> Table::CheckTwoPairs(std::vector<Card> cards)
 {
 	vector<Card> returnedCards;
@@ -397,6 +416,10 @@ std::vector<Card> Table::CheckTwoPairs(std::vector<Card> cards)
 
 	return returnedCards;
 }
+
+
+//Uses the "FindAllOccurencesOfEachValue" function to check if there's a pair
+//if so, complete with the 3 highest cards that are NOT the value of the pair
 std::vector<Card> Table::CheckPair(std::vector<Card> cards)
 {
 	vector<Card> returnedCards;
@@ -505,11 +528,13 @@ HandValue Table::CheckPlayerHand(Player player)
 	}
 	else
 	{
+		//If no hand was found, we can just find the highest card of the player with the "SortByValue" function
 		playerHandValue = HandValue::kHighCard;
 	}
 	
 	
-
+	//returns the player hand value.
+	//TODO:Needs to be stocked somewhere (in the table perhaps ?)
 	return playerHandValue;
 }
 
@@ -528,6 +553,8 @@ Deck Table::GetDeck()
 {
 	return *_deck;
 }
+
+//Functions to draw the cards in the center of the table (possibility to cheat for now to test the different hand)
 
 void Table::Flop()
 {

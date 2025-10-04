@@ -51,6 +51,7 @@ private:
 
 
 public:
+	//Takes the reference of each
 	Table(Player* player1, Player* player2, Deck* deck);
 
 	//Check Player Hands
@@ -70,6 +71,8 @@ public:
 	void FifthStreet();
 
 	void CheatCenterCards();
+
+	//TODO: Create those functions 
 	//Play turn
 	//DefineWinner
 };

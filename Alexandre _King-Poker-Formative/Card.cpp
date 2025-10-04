@@ -27,6 +27,7 @@ std::string Card::ColorToString(Color color)
 	case Color::kSquares:
 		return "Squares";
 	default:
+		//This can happen in case the color is defined to ColorCounter (which should not happen)
 		std::cout << "Error with Color ?? Not supposed to pass here";
 		break;
 	}
@@ -63,6 +64,7 @@ std::string Card::ValueToString(Value value)
 	case Value::kAce:
 		return "Ace";
 		default:
+			//This can happen in case the color is defined to ValueCounter (which should not happen)
 			std::cout << "Error with Value ?? Not supposed to pass here";
 			break;
 	}

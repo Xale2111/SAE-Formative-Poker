@@ -9,6 +9,7 @@ int defaultStartMoney = 500;
 
 int main()
 {
+    //Test for special chars (maybe we can draw each cards instead of just writing it ?)
     SetConsoleOutputCP(CP_UTF8); // passe la console en UTF-8
     std::string test = reinterpret_cast<const char*>(u8"♥ ♦ ♣ ♠");
     //std::cout << test << std::endl;
@@ -30,6 +31,9 @@ int main()
     player.GetNewCard(Card(Value::k3, Color::kHearts));
 
     std::cout << player.GetName() +" \t\t:"+ player.ToString()<<std::endl;
+
+    //This is commented to temporarily chose the cards of the player and check if the "CheckPlayerHand" works correctly
+
  //   std::cout << bot.GetName() + " \t:" + bot.ToString()<<std::endl;
 
     /*for (auto card : table.GetDeck().GetDeck())
@@ -47,7 +51,10 @@ int main()
     //table.CheckPlayerHand(table.GetPlayerTwo());
 
     //Should I create a Menu ?
-    
+
+
+    //How a full game should work :
+
     // Create Deck
     // Create player
     // Create Table 

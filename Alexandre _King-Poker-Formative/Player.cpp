@@ -10,6 +10,7 @@ Player::Player(std::string name,int StartMoneyAmount)
 //Private functions
 
 //Public functions
+//when picking a new card, this is done this way so we can pick one card for each player one by one (like we would do in real life)
 void Player::GetNewCard(Card newCard)
 {
 	if (_hand[0].GetValue() == Value::ValueCounter)

@@ -22,6 +22,7 @@ void Deck::InitializeDeck()
 	ShuffleDeck();
 }
 
+//Shuffles the deck
 void Deck::ShuffleDeck()
 {
 	std::random_device rd;
@@ -37,6 +38,7 @@ std::vector<Card> Deck::GetDeck()
 	return _deck;
 }
 
+//Pick the card on the top of the deck and removes it afterward 
 Card Deck::PickCard()
 {
 	Card card = _deck.back();
