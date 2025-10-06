@@ -4,21 +4,7 @@
 #include "Deck.h"
 #include "Player.h"
 
-enum class HandValue
-{
-						//Who's the winner in case of same hand value?
-	kHighCard,			//Highest card
-	kPair,				//Highest pair ->  highest card
-	kTwoPairs,			//Highest pair -> highest second pair -> highest card
-	kThreeOfAKind,		//Highest 3 of a kind -> highest card
-	kStraight,			//highest card IN the straight
-	kFlush,				//highest card IN the flush
-	kFull,				//Highest card IN the full (so in the 3 of a kind OR pair)
-	kFourOfAKind,		//Highest 4 of a king -> Highest card
-	kStraightFlush,		//Highest card IN the straight flush
-	kRoyalFlush			//perfect equality, can't decide (if happens, royal flush is in the center of table and everyone win)
 
-};
 
 class Table
 {
@@ -26,6 +12,7 @@ private:
 	std::vector<Card> _tableCards;
 	int _totalBets;
 	int _playerStartIndex;
+	std::vector<Card> _currentPlayerFinalHand;
 	Player* _player1;
 	Player* _player2;
 	Deck* _deck;	
@@ -50,12 +37,14 @@ private:
 	std::vector<Card> CheckPair(std::vector<Card> cards);
 
 
+	Card FindPlayerHighestCard(std::vector<Card> cards);
+
 public:
 	//Takes the reference of each
 	Table(Player* player1, Player* player2, Deck* deck);
 
 	//Check Player Hands
-	HandValue CheckPlayerHand(Player player);
+	HandValue CheckPlayerHand(Player* player);
 
 	Player GetPlayerOne();
 	Player GetPlayerTwo();
@@ -72,8 +61,9 @@ public:
 
 	void CheatCenterCards();
 
+	Player* DefineWinner();
+
 	//TODO: Create those functions 
 	//Play turn
-	//DefineWinner
 };
 

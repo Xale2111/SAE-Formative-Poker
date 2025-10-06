@@ -21,34 +21,57 @@ int main()
     Player bot("REALLY BAD BOT",defaultStartMoney);
     Table table(&player,&bot,&deck);
    
-   /* for (int inx = 0; inx < amountOfPlayer; inx++)
+    for (int inx = 0; inx < amountOfPlayer; inx++)
     {
         player.GetNewCard(deck.PickCard());
         bot.GetNewCard(deck.PickCard());
-    }*/
+    }
+	/*
 
-    player.GetNewCard(Card(Value::k10, Color::kHearts));
-    player.GetNewCard(Card(Value::k3, Color::kHearts));
+    player.GetNewCard(Card(Value::k5, Color::kHearts));
+    player.GetNewCard(Card(Value::k9, Color::kHearts));
+    bot.GetNewCard(Card(Value::k5, Color::kSpades));
+    bot.GetNewCard(Card(Value::k6, Color::kHearts));*/
+	
 
     std::cout << player.GetName() +" \t\t:"+ player.ToString()<<std::endl;
 
-    //This is commented to temporarily chose the cards of the player and check if the "CheckPlayerHand" works correctly
+    std::cout << bot.GetName() + " \t:" + bot.ToString()<<std::endl;
 
- //   std::cout << bot.GetName() + " \t:" + bot.ToString()<<std::endl;
+   //table.CheatCenterCards();
 
-    /*for (auto card : table.GetDeck().GetDeck())
+
+    /*
+    for (auto card : table.GetDeck().GetDeck())
     { 
         std::cout << card.ToString() << std::endl;
     }*/
-    /*
+    
     table.Flop();
 
     table.FourthStreet();
-    table.FifthStreet();*/
-    table.CheatCenterCards();
+    table.FifthStreet();
+	
 
-    table.CheckPlayerHand(table.GetPlayerOne());
-    //table.CheckPlayerHand(table.GetPlayerTwo());
+    player.SetHandValue(table.CheckPlayerHand(&player));
+    bot.SetHandValue(table.CheckPlayerHand(&bot));
+
+    std::cout << "\n--------RESULTS--------\n\n";
+
+    std::cout << player.GetName() + "\t\t" + player.HandValueToString() << std::endl;
+    std::cout << bot.GetName() + "\t" + bot.HandValueToString()<< std::endl;
+
+    Player* winnerPtr = table.DefineWinner();
+    
+
+    if (winnerPtr == nullptr)
+    {
+	    std::cout << "Nobody won, it's an equality. The pot is split between all remaining players." << std::endl;
+    }
+    else
+    {
+        std::cout << winnerPtr->GetName() << " WON !" << std::endl;
+    }
 
     //Should I create a Menu ?
 
@@ -79,3 +102,9 @@ int main()
 
     
 }
+
+/*
+ table.CheatCenterCards();
+
+player.GetNewCard(Card(Value::k6, Color::kSpades));
+player.GetNewCard(Card(Value::k3, Color::kHearts));*/
