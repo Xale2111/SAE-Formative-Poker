@@ -37,7 +37,7 @@ private:
 	std::vector<Card> CheckPair(std::vector<Card> cards);
 
 
-	Card FindPlayerHighestCard(std::vector<Card> cards);
+	std::array<Card,2> FindPlayerHighestCard(std::vector<Card> firstPlayerCards, std::vector<Card> secondPlayerCards, HandValue sameHandValue);
 
 public:
 	//Takes the reference of each

@@ -517,46 +517,96 @@ std::vector<Card> Table::CheckPair(std::vector<Card> cards)
 //If 5 different occurence > Find highest card
 //if 4 different occurence >
 //TODO : Compare the two hand directly since this time we know they have the same hand value REFACTOR THIS FUNCTION
-Card Table::FindPlayerHighestCard(std::vector<Card> cards)
+std::array<Card, 2> Table::FindPlayerHighestCard(std::vector<Card> firstPlayerCards, std::vector<Card> secondPlayerCards, HandValue sameHandValue)
 {
-	Card highestCard;
-	cards = SortByValue(cards);
-	unordered_map<Value, int> occurenceOfEachValue = FindAllOccurencesOfEachValue(cards);
-	Value highestCardValue = Value::k2;
+	std::array<Card, 2> playersHighestCards;
+	Card firstPlayerhighestCard;
+	firstPlayerCards = SortByValue(firstPlayerCards);
+	unordered_map<Value, int> firstPlayerOccurence = FindAllOccurencesOfEachValue(firstPlayerCards);
 
-	switch (occurenceOfEachValue.size())
+	Card secondPlayerhighestCard;
+	secondPlayerCards = SortByValue(secondPlayerCards);
+	unordered_map<Value, int> secondPlayerOccurence = FindAllOccurencesOfEachValue(secondPlayerCards);
+
+	switch (sameHandValue)
 	{
-	case 5:
-		for (auto occurence : occurenceOfEachValue)
+	case HandValue::kFourOfAKind:
+		
+		Value firstPlayerValue;
+		Value secondPlayerValue;
+
+		for (auto occurence : firstPlayerOccurence)
 		{
-			if (occurence.second == 1 && occurence.first > highestCardValue)
+			if (occurence.second == 4)
 			{
-				highestCardValue = occurence.first;
+				firstPlayerValue = occurence.first;
 			}
 		}
-		break;
-	case 4:
-		for (auto occurence : occurenceOfEachValue)
+		for (auto occurence : secondPlayerOccurence)
 		{
-			if (o)
+			if (occurence.second == 4)
 			{
-				
+				secondPlayerValue = occurence.first;
 			}
 		}
+
+		if (firstPlayerValue == secondPlayerValue)
+		{
+			//check 1 occurence card
+			for (auto occurence : firstPlayerOccurence)
+			{
+				if (occurence.second == 1)
+				{
+					firstPlayerValue = occurence.first;
+				}
+			}
+			for (auto occurence : secondPlayerOccurence)
+			{
+				if (occurence.second == 1)
+				{
+					secondPlayerValue = occurence.first;
+				}
+			}
+			auto temp = find(firstPlayerCards.begin(), firstPlayerCards.end(), [firstPlayerValue](Card card)
+				{
+					return card.GetValue() == firstPlayerValue;
+				});
+
+			find(secondPlayerCards.begin(), secondPlayerCards.end(), [secondPlayerValue](Card card)
+				{
+					return card.GetValue() == secondPlayerValue;
+				});
+		}
+		else
+		{
+			firstPlayerhighestCard = firstPlayerCards[firstPlayerCards.size() - 1];
+			secondPlayerhighestCard = secondPlayerCards[secondPlayerCards.size() - 1];
+		}
+		
+
+
+		break;
+	case HandValue::kFull:
+		break;
+	case HandValue::kThreeOfAKind:
+		break;
+	case HandValue::kTwoPairs:
+		break;
+	case HandValue::kPair:
+		break;
+	default:
+		firstPlayerhighestCard = firstPlayerCards[firstPlayerCards.size() - 1];
+		secondPlayerhighestCard = secondPlayerCards[secondPlayerCards.size() - 1];
 		break;
 	}
-	
-	for (auto card : cards)
-	{
-		if (card.GetValue() == highestCardValue)
-		{
-			highestCard = card;
-			break;
-		}
-	}
 
 
-	return highestCard;
+
+	playersHighestCards[0] = firstPlayerhighestCard;
+	playersHighestCards[1] = secondPlayerhighestCard;
+
+
+	return playersHighestCards;
 }
 
 
@@ -669,13 +719,16 @@ Player* Table::DefineWinner()
 
 	if (GetPlayerOne().GetHandValue() == GetPlayerTwo().GetHandValue())
 	{
-		Card player1HighestCard = FindPlayerHighestCard(GetPlayerOne().GetFinalHand());
-		Card player2HighestCard = FindPlayerHighestCard(GetPlayerTwo().GetFinalHand());
+		array<Card, 2> highestCardResult = FindPlayerHighestCard(GetPlayerOne().GetFinalHand(), GetPlayerTwo().GetFinalHand(), GetPlayerOne().GetHandValue());
 
-		if (player1HighestCard.GetValue() != player2HighestCard.GetValue())
+		//If highestCardResult[0] = highestCardResult[1] -> equality
+		//if highestCardResult[0] > highestCardResult[1] -> player one won
+		//if highestCardResult[0] < highestCardResult[1] -> player two won
+		if (highestCardResult[0].GetValue() != highestCardResult[1].GetValue())
 		{
-			winner = player1HighestCard.GetValue() > player2HighestCard.GetValue() ? _player1 : _player2;
+			winner = highestCardResult[0].GetValue() > highestCardResult[1].GetValue() ? _player1 : _player2;
 		}
+
 	}
 	else
 	{
