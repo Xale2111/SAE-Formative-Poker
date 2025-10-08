@@ -32,6 +32,7 @@ private:
 
 public:
 	Player(std::string name,int StartMoneyAmount);
+	void SetMoney(int newAmount);
 	int GetMoney();
 	std::string GetName();
 	//Pick a card for the player
@@ -47,14 +48,12 @@ public:
 	void SetFinalHand(std::vector<Card> finalHand);
 	std::vector<Card> GetFinalHand();
 
-	//TODO : Create those functions
-	//Bet
-	//Check
-	//AllIn
-	//Fold
-	//Win/Lose (ChangeMoneyAmount)
 
+	void Bet(int betAmount);
+	void Check();
+	void AllIn();
+	void Fold();
 
-
+	void ChangeMoneyAmount();
 };
 

@@ -528,72 +528,208 @@ std::array<Card, 2> Table::FindPlayerHighestCard(std::vector<Card> firstPlayerCa
 	secondPlayerCards = SortByValue(secondPlayerCards);
 	unordered_map<Value, int> secondPlayerOccurence = FindAllOccurencesOfEachValue(secondPlayerCards);
 
+	Value firstPlayerValue = Value::k2;
+	Value secondPlayerValue = Value::k2;
+
+	int tempCounter = 0;
+
+
 	switch (sameHandValue)
 	{
+	#pragma region 4OfAKind and Full
 	case HandValue::kFourOfAKind:
-		
-		Value firstPlayerValue;
-		Value secondPlayerValue;
+	case HandValue::kFull:
 
 		for (auto occurence : firstPlayerOccurence)
 		{
-			if (occurence.second == 4)
+			if (occurence.second == 4 || occurence.second == 3)
 			{
 				firstPlayerValue = occurence.first;
+				break;
 			}
 		}
 		for (auto occurence : secondPlayerOccurence)
 		{
-			if (occurence.second == 4)
+			if (occurence.second == 4 || occurence.second == 3)
 			{
 				secondPlayerValue = occurence.first;
+				break;
 			}
 		}
 
 		if (firstPlayerValue == secondPlayerValue)
 		{
-			//check 1 occurence card
-			for (auto occurence : firstPlayerOccurence)
-			{
-				if (occurence.second == 1)
-				{
-					firstPlayerValue = occurence.first;
-				}
-			}
-			for (auto occurence : secondPlayerOccurence)
-			{
-				if (occurence.second == 1)
-				{
-					secondPlayerValue = occurence.first;
-				}
-			}
-			auto temp = find(firstPlayerCards.begin(), firstPlayerCards.end(), [firstPlayerValue](Card card)
+			erase_if(firstPlayerCards, [firstPlayerValue](Card card)
 				{
 					return card.GetValue() == firstPlayerValue;
 				});
 
-			find(secondPlayerCards.begin(), secondPlayerCards.end(), [secondPlayerValue](Card card)
+			erase_if(secondPlayerCards, [secondPlayerValue](Card card)
 				{
 					return card.GetValue() == secondPlayerValue;
 				});
+
+
+			firstPlayerhighestCard = firstPlayerCards[0];
+			secondPlayerhighestCard = secondPlayerCards[0];
+			
 		}
 		else
 		{
-			firstPlayerhighestCard = firstPlayerCards[firstPlayerCards.size() - 1];
-			secondPlayerhighestCard = secondPlayerCards[secondPlayerCards.size() - 1];
+			erase_if(firstPlayerCards, [firstPlayerValue](Card card)
+				{
+					return card.GetValue() != firstPlayerValue;
+				});
+
+			erase_if(secondPlayerCards, [secondPlayerValue](Card card)
+				{
+					return card.GetValue() != secondPlayerValue;
+				});
+
+
+			firstPlayerhighestCard = firstPlayerCards[0];
+			secondPlayerhighestCard = secondPlayerCards[0];
 		}
-		
-
-
-		break;
-	case HandValue::kFull:
+	#pragma endregion 4OfAKind and Full
 		break;
 	case HandValue::kThreeOfAKind:
+	case HandValue::kPair:
+	#pragma region 3OfAKind and Pair
+		for (auto occurence : firstPlayerOccurence)
+		{
+			if (occurence.second == 3 || occurence.second == 2)
+			{
+				firstPlayerValue = occurence.first;
+				break;
+			}
+		}
+		for (auto occurence : secondPlayerOccurence)
+		{
+			if (occurence.second == 3 || occurence.second == 2)
+			{
+				secondPlayerValue = occurence.first;
+				break;
+			}
+		}
+
+		if (firstPlayerValue == secondPlayerValue)
+		{
+			erase_if(firstPlayerCards, [firstPlayerValue](Card card)
+				{
+					return card.GetValue() == firstPlayerValue;
+				});
+
+			erase_if(secondPlayerCards, [secondPlayerValue](Card card)
+				{
+					return card.GetValue() == secondPlayerValue;
+				});
+
+
+			firstPlayerhighestCard = firstPlayerCards[firstPlayerCards.size()-1];
+			secondPlayerhighestCard = secondPlayerCards[secondPlayerCards.size() - 1];
+
+		}
+		else
+		{
+			erase_if(firstPlayerCards, [firstPlayerValue](Card card)
+				{
+					return card.GetValue() != firstPlayerValue;
+				});
+
+			erase_if(secondPlayerCards, [secondPlayerValue](Card card)
+				{
+					return card.GetValue() != secondPlayerValue;
+				});
+
+
+			firstPlayerhighestCard = firstPlayerCards[0];
+			secondPlayerhighestCard = secondPlayerCards[0];
+		}
+		#pragma endregion 3OfAKind and Pair
 		break;
 	case HandValue::kTwoPairs:
+
+		array<Value, 2> firstPlayerPairValues;
+		array<Value, 2> secondPlayerPairValues;
+		for (auto occurence : firstPlayerOccurence)
+		{
+			if (occurence.second == 2)
+			{
+				firstPlayerPairValues[tempCounter] = occurence.first;
+				tempCounter = 1;
+			}
+		}
+		tempCounter = 0;
+		for (auto occurence : secondPlayerOccurence)
+		{
+			if (occurence.second == 2)
+			{
+				secondPlayerPairValues[tempCounter] = occurence.first;
+				tempCounter = 1;
+			}
+		}
+
+		sort(firstPlayerPairValues.begin(), firstPlayerPairValues.end(), [](Value valueA, Value valueB)
+			{
+					return valueA < valueB;
+			});
+
+		sort(secondPlayerPairValues.begin(), secondPlayerPairValues.end(), [](Value valueA, Value valueB)
+			{
+				return valueA < valueB;
+			});
+
+
+		//If highest pair is equal -> check second pair
+		if (firstPlayerPairValues[1] == secondPlayerPairValues[1])
+		{
+			//if second pair is equal -> take last card
+			if (firstPlayerPairValues[0] == secondPlayerPairValues[0])
+			{
+				erase_if(firstPlayerCards, [firstPlayerPairValues](Card card)
+					{
+						return card.GetValue() == firstPlayerPairValues[1] || card.GetValue() == firstPlayerPairValues[0];
+					});
+
+				erase_if(secondPlayerCards, [secondPlayerPairValues](Card card)
+					{
+						return card.GetValue() == secondPlayerPairValues[1] || card.GetValue() == secondPlayerPairValues[0];
+					});
+
+			}
+			else
+			{
+				erase_if(firstPlayerCards, [firstPlayerPairValues](Card card)
+					{
+						return card.GetValue() != firstPlayerPairValues[0];
+					});
+
+				erase_if(secondPlayerCards, [secondPlayerPairValues](Card card)
+					{
+						return card.GetValue() != secondPlayerPairValues[0];
+					});
+			}
+		}
+		else
+		{
+			//highest pair isn't equal
+			//take highest value
+			erase_if(firstPlayerCards, [firstPlayerPairValues](Card card)
+				{
+					return card.GetValue() != firstPlayerPairValues[1];
+				});
+
+			erase_if(secondPlayerCards, [secondPlayerPairValues](Card card)
+				{
+					return card.GetValue() != secondPlayerPairValues[1];
+				});
+		}
+
+		firstPlayerhighestCard = firstPlayerCards[0];
+		secondPlayerhighestCard = secondPlayerCards[0];
+
 		break;
-	case HandValue::kPair:
-		break;
+
 	default:
 		firstPlayerhighestCard = firstPlayerCards[firstPlayerCards.size() - 1];
 		secondPlayerhighestCard = secondPlayerCards[secondPlayerCards.size() - 1];
@@ -742,10 +878,10 @@ Player* Table::DefineWinner()
 
 void Table::CheatCenterCards()
 {
-	_tableCards.emplace_back(Card(Value::k5,Color::kSquares));
-	_tableCards.emplace_back(Card(Value::k9, Color::kSquares));
-	_tableCards.emplace_back(Card(Value::k2, Color::kSpades));
+	_tableCards.emplace_back(Card(Value::k10,Color::kSquares));
+	_tableCards.emplace_back(Card(Value::k10, Color::kHearts));
+	_tableCards.emplace_back(Card(Value::kKing, Color::kSpades));
+	_tableCards.emplace_back(Card(Value::k3, Color::kClub));
 	_tableCards.emplace_back(Card(Value::k2, Color::kClub));
-	_tableCards.emplace_back(Card(Value::kJack, Color::kClub));
 
 }

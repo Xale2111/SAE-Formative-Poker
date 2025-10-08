@@ -79,6 +79,12 @@ std::string Player::GetName()
 	return _name;
 }
 
+void Player::SetMoney(int newAmount)
+{
+	_money = newAmount;
+}
+
+
 int Player::GetMoney()
 {
 	return _money;
@@ -117,4 +123,32 @@ void Player::SetFinalHand(std::vector<Card> finalHand)
 std::vector<Card> Player::GetFinalHand()
 {
 	return _finalHand;
+}
+
+
+//Betting related Functions
+
+void Player::Bet(int betAmount)
+{
+	SetMoney(GetMoney() - betAmount);
+}
+
+void Player::Check()
+{
+
+}
+
+void Player::AllIn()
+{
+	Bet(GetMoney());
+}
+
+void Player::Fold()
+{
+
+}
+
+void Player::ChangeMoneyAmount()
+{
+	
 }

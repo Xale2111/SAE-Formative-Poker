@@ -62,8 +62,5 @@ public:
 	void CheatCenterCards();
 
 	Player* DefineWinner();
-
-	//TODO: Create those functions 
-	//Play turn
 };
 
