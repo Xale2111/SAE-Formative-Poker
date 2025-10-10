@@ -23,13 +23,6 @@ int main()
     Player player("PLAYER", defaultStartMoney);
     Player bot("REALLY BAD BOT",defaultStartMoney);
     Table table(&player,&bot,&deck);
-   
-    for (int inx = 0; inx < amountOfPlayer; inx++)
-    {
-        player.GetNewCard(deck.PickCard());
-        bot.GetNewCard(deck.PickCard());
-    }
-
 
 
     //Full Hand :
@@ -67,6 +60,13 @@ int main()
 
     while (inGame)
     {
+        table.ResetTable();
+        deck.ResetDeck();
+        for (int inx = 0; inx < amountOfPlayer; inx++)
+        {
+            player.GetNewCard(deck.PickCard());
+            bot.GetNewCard(deck.PickCard());
+        }
         do
         {
 
@@ -204,7 +204,7 @@ int main()
                         if (player.GetBetAmountThisRound() >= bot.GetMoney() / 2)
                         {
                             float chanceOfWinning = BotCheckChanceOfWinning(botCards, table);
-                            if (chanceOfWinning >= 85.0f)
+                            if (chanceOfWinning >= 75.f)
                             {
                                 if (player.GetCurrentBetAction() == BetAction::kAllIn)
                                 {
@@ -226,7 +226,7 @@ int main()
                                     followPlayer = true;
                                 }
                             }
-                            else if (chanceOfWinning > 60.0f)
+                            else if (chanceOfWinning > 50.f)
                             {
                                 //follow (add bluff here in case, check or raise)
                                 //random for a bluff
@@ -236,7 +236,7 @@ int main()
 
                                 if (!shouldBluff)
                                 {
-                                    if (100 - chanceOfWinning <= 15.f)
+                                    if (chanceOfWinning >= 70.f)
                                     {
                                         betAmount = floor(player.GetBetAmountThisRound() + bot.GetMoney() * ((100 - chanceOfWinning + randomNum) / 100));
                                         actionToExecute = BetAction::kBet;
@@ -261,7 +261,7 @@ int main()
                         else
                         {
                             float chanceOfWinning = BotCheckChanceOfWinning(botCards, table, true);
-                            if (chanceOfWinning >= 65.0f)
+                            if (chanceOfWinning >= 45.f)
                             {
                                 //raise by X (calculate with all percentage above 85) (if all in -> commit)
                                 if (player.GetCurrentBetAction() == BetAction::kAllIn)
@@ -285,7 +285,7 @@ int main()
 
                                     if (!shouldBluff)
                                     {
-                                        if (chanceOfWinning >= 80.f)
+                                        if (chanceOfWinning >= 65.f)
                                         {
                                             betAmount = floor(player.GetBetAmountThisRound() + bot.GetMoney() * ((100 - chanceOfWinning + randomNum) / 100));
                                             actionToExecute = BetAction::kBet;
@@ -303,7 +303,7 @@ int main()
                                     }
                                 }
                             }
-                            else if (chanceOfWinning > 27.5f)
+                            else if (chanceOfWinning > 10.f)
                             {
                                 //follow (add bluff here in case, check or raise)
                                 srand(time(0));
@@ -312,7 +312,7 @@ int main()
 
                                 if (!shouldBluff)
                                 {
-                                    if (chanceOfWinning >= 45.f)
+                                    if (chanceOfWinning >= 30.f)
                                     {
                                         betAmount = floor(player.GetBetAmountThisRound() + bot.GetMoney() * ((100 - chanceOfWinning / 2 + randomNum) / 100));
                                         actionToExecute = BetAction::kBet;
@@ -408,7 +408,6 @@ int main()
                         bot.Bet(betAmount);
                         if (followPlayer)
                         {
-                            bot.Check();
                             std::cout << bot.GetName() << " followed your bet \n";
                         }
                         else
@@ -508,6 +507,8 @@ int main()
 
             if (currentRound >= 3)
             {
+	           
+
                 //end of hand
                 inHand = false;
                 player.SetHandValue(table.CheckPlayerHand(&player));
@@ -520,27 +521,42 @@ int main()
 
                 Player* winnerPtr = table.DefineWinner();
 
-
-                if (winnerPtr == nullptr)
+                if (player.GetCurrentBetAction() == BetAction::kFold)
                 {
-                    std::cout << "Nobody won, it's an equality. The pot is split between all remaining players." << std::endl;
-                    player.ChangeMoneyAmount(table.GetTotalBet() / 2);
-                    bot.ChangeMoneyAmount(table.GetTotalBet() / 2);
+                    std::cout << bot.GetName() << " WON !" << std::endl;
+                    bot.ChangeMoneyAmount(table.GetTotalBet());
+
+                }
+                else if (bot.GetCurrentBetAction() == BetAction::kFold)
+                {
+                    std::cout << player.GetName() << " WON !" << std::endl;
+                    player.ChangeMoneyAmount(table.GetTotalBet());
                 }
                 else
                 {
-                    std::cout << winnerPtr->GetName() << " WON !" << std::endl;
-                    if (winnerPtr->GetName() == player.GetName())
+                    if (winnerPtr == nullptr)
                     {
-                        player.ChangeMoneyAmount(table.GetTotalBet());
-                        bot.ChangeMoneyAmount(-table.GetTotalBet());
+                        std::cout << "Nobody won, it's an equality. The pot is split between all remaining players." << std::endl;
+                        player.ChangeMoneyAmount(table.GetTotalBet() / 2);
+                        bot.ChangeMoneyAmount(table.GetTotalBet() / 2);
                     }
                     else
                     {
-                        player.ChangeMoneyAmount(-table.GetTotalBet());
-                        bot.ChangeMoneyAmount(table.GetTotalBet());
+
+                        std::cout << winnerPtr->GetName() << " WON !" << std::endl;
+                        if (winnerPtr->GetName() == player.GetName())
+                        {
+                            player.ChangeMoneyAmount(table.GetTotalBet());
+                        }
+                        else
+                        {
+                            bot.ChangeMoneyAmount(table.GetTotalBet());
+                        }
                     }
                 }
+
+                std::cout << player.GetName() << " now has " << player.GetMoney() << " Dollars\n";
+                std::cout << bot.GetName() << " now has " << bot.GetMoney() << " Dollars\n";
                 table.ResetTotalBet();
 
                 if (player.GetMoney() <= 0)

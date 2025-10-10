@@ -69,5 +69,6 @@ public:
 	void AddToTotalBet(int amountToAdd);
 
 	void ResetTotalBet();
+	void ResetTable();
 };
 

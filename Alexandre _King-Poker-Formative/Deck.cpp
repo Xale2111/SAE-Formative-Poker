@@ -47,3 +47,10 @@ Card Deck::PickCard()
 	return card;
 }
 
+void Deck::ResetDeck()
+{
+	_deck.clear();
+	InitializeDeck();
+}
+
+

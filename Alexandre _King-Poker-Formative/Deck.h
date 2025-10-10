@@ -14,5 +14,7 @@ public:
 	std::vector<Card> GetDeck();
 	Card PickCard();
 
+	void ResetDeck();
+
 };
 

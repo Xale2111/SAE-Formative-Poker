@@ -898,6 +898,11 @@ void Table::ResetTotalBet()
 	_totalBets = 0;
 }
 
+void Table::ResetTable()
+{
+	ResetTotalBet();
+	_tableCards.clear();
+}
 
 
 
