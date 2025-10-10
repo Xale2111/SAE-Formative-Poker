@@ -12,9 +12,9 @@ float BotCheckChanceOfWinning(std::array<Card,2> botCards, Table table, bool can
 int main()
 {
     //Test for special chars (maybe we can draw each cards instead of just writing it ?)
-    SetConsoleOutputCP(CP_UTF8); // passe la console en UTF-8
+    /*SetConsoleOutputCP(CP_UTF8); // passe la console en UTF-8
     std::string test = reinterpret_cast<const char*>(u8"♥ ♦ ♣ ♠");
-    //std::cout << test << std::endl;
+    //std::cout << test << std::endl;*/
 
 	int defaultStartMoney = 500;
     int amountOfPlayer = 2;
@@ -48,13 +48,8 @@ int main()
      * --end loop--
      */
 
-    bool playingHand = true;
     //int startingPlayerIndex;
-    int highestBetAmountThisRound = 0;
-    int currentRound = 0;
     bool inGame = true;
-    bool inHand = true;
-    bool skipRemainingTurns = false;
 
     std::string temp;
 
@@ -62,6 +57,12 @@ int main()
     {
         table.ResetTable();
         deck.ResetDeck();
+        int currentRound = 0;
+    	bool inHand = true;
+        bool playingHand = true;
+        bool skipRemainingTurns = false;
+        int highestBetAmountThisRound = 0;
+
         for (int inx = 0; inx < amountOfPlayer; inx++)
         {
             player.GetNewCard(deck.PickCard());
@@ -303,7 +304,7 @@ int main()
                                     }
                                 }
                             }
-                            else if (chanceOfWinning > 10.f)
+                            else if (chanceOfWinning > 5.f)
                             {
                                 //follow (add bluff here in case, check or raise)
                                 srand(time(0));
@@ -312,7 +313,7 @@ int main()
 
                                 if (!shouldBluff)
                                 {
-                                    if (chanceOfWinning >= 30.f)
+                                    if (chanceOfWinning >= 27.5f)
                                     {
                                         betAmount = floor(player.GetBetAmountThisRound() + bot.GetMoney() * ((100 - chanceOfWinning / 2 + randomNum) / 100));
                                         actionToExecute = BetAction::kBet;
@@ -340,7 +341,7 @@ int main()
                         break;
                     case BetAction::kCheck:
                         float chanceOfWinning = BotCheckChanceOfWinning(botCards, table, true);
-                        if (chanceOfWinning >= 65.0f)
+                        if (chanceOfWinning >= 45.0f)
                         {
                             //raise by X (calculate with all percentage above 85) (if all in -> commit) (add bluff here in case, check or raise)
 
@@ -350,7 +351,7 @@ int main()
 
                             if (!shouldBluff)
                             {
-                                if (chanceOfWinning >= 80.f)
+                                if (chanceOfWinning >= 60.f)
                                 {
                                     betAmount = floor(player.GetBetAmountThisRound() + bot.GetMoney() * ((100 - chanceOfWinning + randomNum) / 100));
                                     actionToExecute = BetAction::kBet;
@@ -366,7 +367,7 @@ int main()
                             }
 
                         }
-                        else if (chanceOfWinning > 27.5f)
+                        else if (chanceOfWinning > 10.f)
                         {
                             //follow (add bluff here in case, check or raise)
                             srand(time(0));
@@ -375,7 +376,7 @@ int main()
 
                             if (!shouldBluff)
                             {
-                                if (chanceOfWinning >= 45.f)
+                                if (chanceOfWinning >= 30.f)
                                 {
                                     betAmount = floor(player.GetBetAmountThisRound() + bot.GetMoney() * ((100 - chanceOfWinning / 2 + randomNum) / 100));
                                     actionToExecute = BetAction::kBet;
@@ -554,9 +555,6 @@ int main()
                         }
                     }
                 }
-
-                std::cout << player.GetName() << " now has " << player.GetMoney() << " Dollars\n";
-                std::cout << bot.GetName() << " now has " << bot.GetMoney() << " Dollars\n";
                 table.ResetTotalBet();
 
                 if (player.GetMoney() <= 0)
@@ -570,6 +568,8 @@ int main()
                     std::cout << player.GetName() << " WON THE GAME !!!" << std::endl;
                 }
             }
+            std::cout << player.GetName() << " now has " << player.GetMoney() << " Dollars\n";
+            std::cout << bot.GetName() << " now has " << bot.GetMoney() << " Dollars\n";
 
             currentRound++;
             std::cout << "Press anything to continue" << std::endl;
@@ -614,6 +614,7 @@ int main()
 
 float BotCheckChanceOfWinning(std::array<Card, 2> botCards, Table table, bool canTakeRisk)
 {
+
     float winningChance = 0.f;
     float chanceThreshold[5] = { 5,10,25,50,80 };
 
@@ -651,7 +652,11 @@ float BotCheckChanceOfWinning(std::array<Card, 2> botCards, Table table, bool ca
     allCards.emplace_back(secondCard);
 
 
-    auto occurenceOfEachValue = table.FindAllOccurencesOfEachValue(allCards);
+    std::unordered_map<Value, int> occurenceOfEachValue;
+    for (auto card : allCards)
+    {
+        occurenceOfEachValue[card.GetValue()]++;
+    }
 
     for (auto occurence : occurenceOfEachValue)
     {
@@ -692,63 +697,15 @@ float BotCheckChanceOfWinning(std::array<Card, 2> botCards, Table table, bool ca
         multiplier = 1;
         break;
 
-        default:
-            break;
+    default:
+        break;
     }
 
     //Check flush
     for (auto occurence : occurenceOfEachColor)
     {
-	    switch (occurence.second)
-	    {
-	    case 2:
-            winningChance += chanceThreshold[1] * multiplier;
-            break;
-	    case 3:
-            winningChance += chanceThreshold[2] * multiplier;
-            break;
-	    case 4 :
-            winningChance += chanceThreshold[3] * multiplier;
-            break;
-	    case 5:
-	    case 6:
-	    case 7:
-            winningChance += chanceThreshold[4] * multiplier;
-            break;
-        default:
-            winningChance += 0;
-            break;
-	    }
-    }
-
-    //Check Straight
-    std::sort(allCards.begin(), allCards.end(), [](Card cardA, Card cardB)
+        switch (occurence.second)
         {
-            return cardA.GetValue() < cardB.GetValue();
-        });
-
-    int straightCounter = 0;
-    std::vector<int> straightCounters;
-    //won't check the straight with an ACE to simplify
-    for (int i = 1; i < allCards.size(); ++i)
-    {
-	    if (allCards[i].GetValue() == allCards[i-1].GetValue())
-	    {
-            straightCounters[straightCounter]++;
-	    }
-	    else
-	    {
-            straightCounter++;
-	    }
-    }
-
-
-    //Get the highest straight amount
-    auto highestStraight = std::max_element(straightCounters.begin(), straightCounters.end());
-    if (highestStraight != straightCounters.end())
-    {
-	    switch (*highestStraight)
-	    {
         case 2:
             winningChance += chanceThreshold[1] * multiplier;
             break;
@@ -766,8 +723,63 @@ float BotCheckChanceOfWinning(std::array<Card, 2> botCards, Table table, bool ca
         default:
             winningChance += 0;
             break;
-	    }
+        }
     }
+
+    //Check Straight
+    std::sort(allCards.begin(), allCards.end(), [](Card cardA, Card cardB)
+        {
+            return cardA.GetValue() < cardB.GetValue();
+        });
+
+
+    if ((int)botCards[1].GetValue() - (int)botCards[0].GetValue() <= 3)
+    {
+        winningChance += chanceThreshold[1];
+    }
+
+    /*
+    int straightCounter = 0;
+    std::vector<int> straightCounters;
+    //won't check the straight with an ACE to simplify
+    for (int i = 1; i < allCards.size()-1; ++i)
+    {
+        if (allCards[i].GetValue() == allCards[i - 1].GetValue())
+        {
+            straightCounters[straightCounter]++;
+        }
+        else
+        {
+            straightCounter++;
+        }
+    }
+
+
+    //Get the highest straight amount
+    auto highestStraight = std::max_element(straightCounters.begin(), straightCounters.end());
+    if (highestStraight != straightCounters.end())
+    {
+        switch (*highestStraight)
+        {
+        case 2:
+            winningChance += chanceThreshold[1] * multiplier;
+            break;
+        case 3:
+            winningChance += chanceThreshold[2] * multiplier;
+            break;
+        case 4:
+            winningChance += chanceThreshold[3] * multiplier;
+            break;
+        case 5:
+        case 6:
+        case 7:
+            winningChance += chanceThreshold[4] * multiplier;
+            break;
+        default:
+            winningChance += 0;
+            break;
+        }
+    }*/
 
     if (winningChance <= 30)
     {
@@ -794,9 +806,7 @@ float BotCheckChanceOfWinning(std::array<Card, 2> botCards, Table table, bool ca
 
     float normalized = 0;
     canTakeRisk ? normalized = (winningChance * 1.15f / 240.f) * 100 : normalized = (winningChance / 240.f) * 100;
-  
 
-    
 
     return normalized;
 }
