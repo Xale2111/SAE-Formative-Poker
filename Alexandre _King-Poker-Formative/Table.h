@@ -11,7 +11,6 @@ class Table
 private:
 	std::vector<Card> _tableCards;
 	int _totalBets;
-	int _playerStartIndex;
 	std::vector<Card> _currentPlayerFinalHand;
 	Player* _player1;
 	Player* _player2;
@@ -20,7 +19,6 @@ private:
 	void AddCardToCenter();
 	std::vector<Card> SortByColor(std::vector<Card> cards);
 	std::vector<Card> SortByValue(std::vector<Card> cards);
-	std::unordered_map<Value, int> FindAllOccurencesOfEachValue(std::vector<Card> cards);
 
 
 	//For Royal flush, since this is either an equality or a win for the player, no need to return the cards
@@ -42,6 +40,7 @@ private:
 public:
 	//Takes the reference of each
 	Table(Player* player1, Player* player2, Deck* deck);
+	std::unordered_map<Value, int> FindAllOccurencesOfEachValue(std::vector<Card> cards);
 
 	//Check Player Hands
 	HandValue CheckPlayerHand(Player* player);
@@ -49,6 +48,8 @@ public:
 	Player GetPlayerOne();
 	Player GetPlayerTwo();
 	Deck GetDeck();
+
+	std::vector<Card> GetCenterCards();
 
 	//Flop (add the first 3 cards in the center)
 	void Flop();
@@ -62,5 +63,11 @@ public:
 	void CheatCenterCards();
 
 	Player* DefineWinner();
+
+	int GetTotalBet();
+
+	void AddToTotalBet(int amountToAdd);
+
+	void ResetTotalBet();
 };
 

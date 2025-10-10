@@ -19,16 +19,31 @@ enum class HandValue
 
 };
 
+
+enum class BetAction
+{
+	kNone,
+	kBet,
+	kCheck,
+	kFold,
+	kAllIn
+};
+
 class Player
 {
 private:
 	std::string _name;
 	int _money;
 	std::array<Card, 2> _hand;
+	int _betAmountThisRound;
 	HandValue _currentHandValue = HandValue::kHighCard;
 	std::vector<Card> _finalHand;
+	BetAction _currentBetAction;
 
+	void SetBetAction(BetAction newAction);
 	std::string ConvertHandValueToString();
+
+	void AddBetAmountThisRound(int amountToAdd);
 
 public:
 	Player(std::string name,int StartMoneyAmount);
@@ -48,12 +63,16 @@ public:
 	void SetFinalHand(std::vector<Card> finalHand);
 	std::vector<Card> GetFinalHand();
 
+	int GetBetAmountThisRound();
+	void ResetBetAmountThisRound();
 
 	void Bet(int betAmount);
 	void Check();
 	void AllIn();
 	void Fold();
 
-	void ChangeMoneyAmount();
+	void ChangeMoneyAmount(int amountToAdd);
+
+	BetAction GetCurrentBetAction();
 };
 

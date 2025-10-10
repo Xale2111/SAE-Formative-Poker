@@ -42,44 +42,9 @@ std::vector<Card> Table::SortByValue(std::vector<Card> cards)
 	return cards;
 }
 
-//Find all occurences of the same value and returns an unordered map where the Key is the card value and value is the amount of occurence 
-unordered_map<Value, int> Table::FindAllOccurencesOfEachValue(std::vector<Card> cards)
+std::vector<Card> Table::GetCenterCards()
 {
-	vector<Card> tempCopy = cards;
-	unordered_map<Value, int> occurencesOfEachValue;
-
-	//filter to have a temp vector with only 1 occurence of each value
-	auto newEnd = std::unique(tempCopy.begin(), tempCopy.end(),
-		[](Card a, Card b) {
-			return a.GetValue() == b.GetValue();
-		});
-
-	tempCopy.erase(newEnd, tempCopy.end());
-
-	tempCopy = SortByValue(tempCopy);
-
-	for (auto card : tempCopy)
-	{
-		occurencesOfEachValue.insert(pair<Value, int>(card.GetValue(), 0));
-	}
-
-	//for each card, increase the occurence amount for each value
-	Value currentValue = cards[0].GetValue();
-	for (auto card : cards)
-	{
-		if (card.GetValue() == currentValue)
-		{
-			occurencesOfEachValue.at(currentValue)++;
-		}
-		else
-		{
-			currentValue = card.GetValue();
-			occurencesOfEachValue.at(currentValue)++;
-		}
-
-	}
-
-	return occurencesOfEachValue;
+	return _tableCards;
 }
 
 
@@ -748,6 +713,50 @@ std::array<Card, 2> Table::FindPlayerHighestCard(std::vector<Card> firstPlayerCa
 
 
 //Public Functions
+
+
+//Find all occurences of the same value and returns an unordered map where the Key is the card value and value is the amount of occurence 
+unordered_map<Value, int> Table::FindAllOccurencesOfEachValue(std::vector<Card> cards)
+{
+	vector<Card> tempCopy = cards;
+	unordered_map<Value, int> occurencesOfEachValue;
+
+	//filter to have a temp vector with only 1 occurence of each value
+	auto newEnd = std::unique(tempCopy.begin(), tempCopy.end(),
+		[](Card a, Card b) {
+			return a.GetValue() == b.GetValue();
+		});
+
+	tempCopy.erase(newEnd, tempCopy.end());
+
+	tempCopy = SortByValue(tempCopy);
+
+	for (auto card : tempCopy)
+	{
+		occurencesOfEachValue.insert(pair<Value, int>(card.GetValue(), 0));
+	}
+
+	//for each card, increase the occurence amount for each value
+	Value currentValue = cards[0].GetValue();
+	for (auto card : cards)
+	{
+		if (card.GetValue() == currentValue)
+		{
+			occurencesOfEachValue.at(currentValue)++;
+		}
+		else
+		{
+			currentValue = card.GetValue();
+			occurencesOfEachValue.at(currentValue)++;
+		}
+
+	}
+
+	return occurencesOfEachValue;
+}
+
+
+
 HandValue Table::CheckPlayerHand(Player* player)
 {
 	HandValue playerHandValue = HandValue::kHighCard;
@@ -756,7 +765,7 @@ HandValue Table::CheckPlayerHand(Player* player)
 	allCards.emplace_back(player->GetHand()[0]);
 	allCards.emplace_back(player->GetHand()[1]);
 
-	for (auto card : _tableCards)
+	for (auto card : GetCenterCards())
 	{
 		allCards.emplace_back(card);
 	}
@@ -874,6 +883,22 @@ Player* Table::DefineWinner()
 	return winner;
 }
 
+int Table::GetTotalBet()
+{
+	return _totalBets;
+}
+
+void Table::AddToTotalBet(int amountToAdd)
+{
+	_totalBets += amountToAdd;
+}
+
+void Table::ResetTotalBet()
+{
+	_totalBets = 0;
+}
+
+
 
 
 void Table::CheatCenterCards()
@@ -885,3 +910,5 @@ void Table::CheatCenterCards()
 	_tableCards.emplace_back(Card(Value::k2, Color::kClub));
 
 }
+
+

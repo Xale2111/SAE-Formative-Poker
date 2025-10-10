@@ -54,6 +54,27 @@ std::string Player::ConvertHandValueToString()
 }
 
 
+void Player::AddBetAmountThisRound(int amountToAdd)
+{
+	if (GetMoney()>0)
+	{
+		_betAmountThisRound += amountToAdd;
+		SetBetAction(BetAction::kBet);
+	}
+	else
+	{
+		_betAmountThisRound += GetMoney();
+		SetBetAction(BetAction::kAllIn);
+	}
+}
+
+void Player::SetBetAction(BetAction newAction)
+{
+	_currentBetAction = newAction;
+}
+
+
+
 //Public functions
 //when picking a new card, this is done this way so we can pick one card for each player one by one (like we would do in real life)
 void Player::GetNewCard(Card newCard)
@@ -130,12 +151,13 @@ std::vector<Card> Player::GetFinalHand()
 
 void Player::Bet(int betAmount)
 {
-	SetMoney(GetMoney() - betAmount);
+	AddBetAmountThisRound(betAmount);
+	ChangeMoneyAmount(-betAmount);
 }
 
 void Player::Check()
 {
-
+	SetBetAction(BetAction::kCheck);
 }
 
 void Player::AllIn()
@@ -145,10 +167,26 @@ void Player::AllIn()
 
 void Player::Fold()
 {
-
+	SetBetAction(BetAction::kFold);
 }
 
-void Player::ChangeMoneyAmount()
+void Player::ChangeMoneyAmount(int amountToAdd)
 {
-	
+	SetMoney(GetMoney()+amountToAdd);
+}
+
+int Player::GetBetAmountThisRound()
+{
+	return _betAmountThisRound;
+}
+
+void Player::ResetBetAmountThisRound()
+{
+	_betAmountThisRound = 0;
+}
+
+
+BetAction Player::GetCurrentBetAction()
+{
+	return _currentBetAction;
 }
