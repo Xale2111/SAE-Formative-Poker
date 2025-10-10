@@ -30,9 +30,7 @@ int main()
         bot.GetNewCard(deck.PickCard());
     }
 
-    std::cout << player.GetName() +" \t\t:"+ player.ToString()<<std::endl;
 
-    std::cout << bot.GetName() + " \t:" + bot.ToString()<<std::endl;
 
     //Full Hand :
     /*--loop
@@ -64,21 +62,30 @@ int main()
     bool inGame = true;
     bool inHand = true;
     bool skipRemainingTurns = false;
-    
+
+    std::string temp;
+
     while (inGame)
     {
-
-
         do
         {
 
             playingHand = true;
             do
             {
+                system("cls");
+
+                std::cout << player.GetName() + " \t\t:" + player.ToString() << std::endl;
+                std::cout << bot.GetName() + " \t:" + bot.ToString() << std::endl;
+
+	            for (auto card : table.GetCenterCards())
+	            {
+		            std::cout << "Center card : " << card.ToString() << std::endl;   
+	            }
+
                 player.ResetBetAmountThisRound();
                 bot.ResetBetAmountThisRound();
 
-                //system("cls");
 #pragma region PlayerTurn
         //Take and verify input
                 int playerInput = 0;
@@ -253,8 +260,7 @@ int main()
                         }
                         else
                         {
-                            BotCheckChanceOfWinning(botCards, table, true);
-                            float chanceOfWinning = BotCheckChanceOfWinning(botCards, table);
+                            float chanceOfWinning = BotCheckChanceOfWinning(botCards, table, true);
                             if (chanceOfWinning >= 65.0f)
                             {
                                 //raise by X (calculate with all percentage above 85) (if all in -> commit)
@@ -333,8 +339,7 @@ int main()
                         //check bet amount and calculate risk
                         break;
                     case BetAction::kCheck:
-                        BotCheckChanceOfWinning(botCards, table, true);
-                        float chanceOfWinning = BotCheckChanceOfWinning(botCards, table);
+                        float chanceOfWinning = BotCheckChanceOfWinning(botCards, table, true);
                         if (chanceOfWinning >= 65.0f)
                         {
                             //raise by X (calculate with all percentage above 85) (if all in -> commit) (add bluff here in case, check or raise)
@@ -387,7 +392,6 @@ int main()
                         }
                         else
                         {
-                            //fold
                             actionToExecute = BetAction::kCheck;
                         }
                         break;
@@ -398,21 +402,31 @@ int main()
                     {
                     case BetAction::kAllIn:
                         bot.AllIn();
+                        std::cout << bot.GetName() << " WENT ALL IN BABY !!!!\n";
                         break;
                     case BetAction::kBet:
                         bot.Bet(betAmount);
                         if (followPlayer)
                         {
                             bot.Check();
+                            std::cout << bot.GetName() << " followed your bet \n";
+                        }
+                        else
+                        {
+                            std::cout << bot.GetName() << " raised the bet to " << betAmount << std::endl;
                         }
                         break;
                     case BetAction::kCheck:
                         bot.Check();
+                        std::cout << bot.GetName() << " checked\n";
+
                         break;
                     default:
                         bot.Fold();
+                        std::cout << bot.GetName() << " folded\n";
                         break;
                     }
+                    highestBetAmountThisRound = betAmount;
 
                     table.AddToTotalBet(bot.GetBetAmountThisRound());
 
@@ -438,7 +452,7 @@ int main()
                     skipRemainingTurns = true;
                     playingHand = false;
                 }
-                else if (player.GetCurrentBetAction() == bot.GetCurrentBetAction())
+                else if (player.GetCurrentBetAction() == bot.GetCurrentBetAction() && player.GetBetAmountThisRound() == highestBetAmountThisRound && bot.GetBetAmountThisRound() == highestBetAmountThisRound)
                 {
                     playingHand = false;
                 }
@@ -534,7 +548,7 @@ int main()
                     inGame = false;
                     std::cout << bot.GetName() << " WON THE GAME !!!" << std::endl;
                 }
-                else
+                else if (bot.GetMoney() <= 0)
                 {
                     inGame = false;
                     std::cout << player.GetName() << " WON THE GAME !!!" << std::endl;
@@ -542,9 +556,14 @@ int main()
             }
 
             currentRound++;
-
+            std::cout << "Press anything to continue" << std::endl;
+            std::cin >> temp;
 
         } while (inHand);
+
+
+        std::cout << "Press anything to start new hand"<<std::endl;
+        std::cin >> temp;
     }
 
     //Should I create a Menu ?
@@ -581,7 +600,6 @@ float BotCheckChanceOfWinning(std::array<Card, 2> botCards, Table table, bool ca
 {
     float winningChance = 0.f;
     float chanceThreshold[5] = { 5,10,25,50,80 };
-    int straightDifference = 3;
 
     std::sort(botCards.begin(), botCards.end(), [](Card cardA, Card cardB)
         {
@@ -707,6 +725,8 @@ float BotCheckChanceOfWinning(std::array<Card, 2> botCards, Table table, bool ca
             straightCounter++;
 	    }
     }
+
+
     //Get the highest straight amount
     auto highestStraight = std::max_element(straightCounters.begin(), straightCounters.end());
     if (highestStraight != straightCounters.end())
@@ -731,6 +751,24 @@ float BotCheckChanceOfWinning(std::array<Card, 2> botCards, Table table, bool ca
             winningChance += 0;
             break;
 	    }
+    }
+
+    if (winningChance <= 30)
+    {
+        int handTotalValue = (int)botCards[0].GetValue() + (int)botCards[1].GetValue();
+        //HighestTotalValue is 24 (Ace is 12, so 12*2 = 24)
+        if (handTotalValue >= 18)
+        {
+            winningChance += chanceThreshold[1] + handTotalValue;
+        }
+        else if (handTotalValue >= 9)
+        {
+            winningChance += chanceThreshold[0] + handTotalValue;
+        }
+        else
+        {
+            winningChance += handTotalValue;
+        }
     }
 
 
